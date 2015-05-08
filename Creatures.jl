@@ -6,7 +6,7 @@ module Creatures
 # - generate creatures randomly. 
 # - transform a creature tree into a set of cartesian coordinates
 
-export generate_random, get_coordinates, to_inertial_frame, update_coordinates!
+export random, get_coordinates, to_inertial_frame, update_coordinates!
 
 const o=0.0
 const empty = Array(Float64,0,0)
@@ -46,17 +46,20 @@ type Creature
 end
 
 
-function generate_random(depth,p_split)
-  root = generate_random_node_tree(depth,p_split)
+function random(depth,p_split)
+  root = random_node(depth,p_split)
   return Creature(root)
 end
 
-function generate_random_node_tree(depth,p_split)
+function random_node(depth,p_split)
   if depth>1
+    left = random_node(depth-1,p_split)
     if rand()>p_split
-      return Part(generate_random_node_tree(depth-1,p_split),Nil(),0.0)
+      return Part(left,Nil(),0.0)
     else
-      return Part(generate_random_node_tree(depth-1,p_split),generate_random_node_tree(depth-1,p_split),(0.5-rand())*2*pi)
+      right = random_node(depth-1,p_split)
+      θ = (0.5-rand())*2*pi
+      return Part(left,right,θ)
     end
   end
   return Part(Nil(),Nil(),0.0)

@@ -16,7 +16,7 @@ module WaterWorld
 #   loop
 # - And a creture!
 
-import Creatures: generate_random, update_state!
+import Creatures: random, update_state!
 import AnimatedScatter: play
 
 export run, step
@@ -43,7 +43,7 @@ function step(creature, Δt)
 end
 
 function run(depth,p_split)
-  c = generate_random(depth,p_split)
+  c = random(depth,p_split)
   function coord_generator(x)
     θ=0.05sin(x*0.1)
     update_state!(c)
@@ -58,6 +58,7 @@ end
 function reload()
   Base.reload("Creatures")
   Base.reload("AnimatedScatter")
+  Base.reload("WaterWorld")
 end
 
 end

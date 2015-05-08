@@ -16,7 +16,7 @@ module WaterWorld
 #   loop
 # - And a creture!
 
-import Creatures: generate_random, get_coordinates, to_inertial_frame, update_coordinates!
+import Creatures: generate_random, update_state!
 import AnimatedScatter: play
 
 export run, step
@@ -36,7 +36,7 @@ function update!(creature, F_tot, Δt)
 end
 
 function step(creature, Δt)
-    Δcoords = creature.coords - creature.old_coords
+    Δcoords = creature.state.r - creature.old_state.r
     F = forces(creature, Δcoords, Δt)
     # τ = torques(c, new_coords, F)
     update!(creature, sum(F), Δt)
@@ -46,9 +46,9 @@ function run(depth,p_split)
   c = generate_random(depth,p_split)
   function coord_generator(x)
     θ=0.05sin(x*0.1)
-    update_coordinates!(c,θ)
+    update_state!(c)
     WaterWorld.step(c,0.001)
-    return (c.old_coords .+ c.r)'
+    return (c.state.r .+ c.r)'
   end
   plot_range=40
   p = plot_range

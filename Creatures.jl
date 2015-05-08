@@ -64,7 +64,7 @@ end
 
 function update_state!(creature::Creature)
   creature.old_state = creature.state
-  creature.state = get_state(creature)
+  creature.state = get_state(creature.root)
 end
 
 function get_state(creature::CreatureNode)
@@ -104,14 +104,6 @@ function walk(creature::CreatureNode, up=noop, down=noop, acc=nothing)
     res_right = walk(c.right,up,down,up(c.right,acc))
   end
   down(c,acc,res_left,res_right)
-end
-
-function to_array(creature::CreatureNode)
-  a = Array{CreatureNode,1}
-  up(creature, _) = push!(a,creature)
-  down(creature, _) = nothing
-  walk(creature,up,down,nothing)
-  return a
 end
 
 function to_inertial_frame(state :: CreatureState)

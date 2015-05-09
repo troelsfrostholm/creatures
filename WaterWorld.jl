@@ -30,24 +30,29 @@ function forces(creature, Δcoords, Δt)
   return -abs((int(square_if).*v.+int(!square_if)).*v.*σ).*sign(v)
 end
 
-function update!(creature, F_tot, Δt)
+function update!(creature, F_tot, t, Δt)
+  for node in creature.state.nodes
+    node.θ = node.θ+0.01*sin(t*100)
+  end
   creature.ṙ+=F_tot*Δt
   creature.r += creature.ṙ*Δt
 end
 
-function step(creature, Δt)
+function step(creature,t,Δt)
     Δcoords = creature.state.r - creature.old_state.r
-    F = forces(creature, Δcoords, Δt)
+    F = 0#forces(creature, Δcoords, Δt)
     # τ = torques(c, new_coords, F)
-    update!(creature, sum(F), Δt)
+    update!(creature, sum(F), t, Δt)
 end
 
 function run(depth,p_split)
   c = random(depth,p_split)
+  t = 0
+  Δt = 0.001
   function coord_generator(x)
-    θ=0.05sin(x*0.1)
     update_state!(c)
-    WaterWorld.step(c,0.001)
+    t += Δt
+    WaterWorld.step(c,t,Δt)
     return (c.state.r .+ c.r)'
   end
   plot_range=40

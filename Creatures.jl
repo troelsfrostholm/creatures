@@ -25,12 +25,14 @@ type NodeState
   r          :: Array{Float64,1}
   d          :: Array{Float64,1}
   θ          :: Float64
+  self       :: CreatureNode
 end
 
 type CreatureState
   r          :: Array{Float64,2}
   d          :: Array{Float64,2}
   θ          :: Array{Float64,1}
+  nodes      :: Array{CreatureNode,1}
 end
 
 type Creature
@@ -75,7 +77,8 @@ function get_state(creature::CreatureNode)
   r = apply(hcat, [ns.r for ns in node_states])
   d = apply(hcat, [ns.d for ns in node_states])
   θ = [ns.θ for ns in node_states]
-  to_inertial_frame(CreatureState(r,d,θ))
+  nodes    = [ns.self for ns in node_states]
+  to_inertial_frame(CreatureState(r,d,θ,nodes)   )
 end
 
 function get_node_states(creature::CreatureNode)
@@ -86,12 +89,12 @@ function get_node_states(creature::CreatureNode)
     θ = θ_old+c.θ
     r = r_old+[cos(θ),sin(θ)]
     d = r - r_old
-    NodeState(r,d,θ)
+    NodeState(r,d,θ,c)
   end
   function down(c,cur_state,left,right)
     [cur_state,left,right]
   end
-  walk(creature,up,down,NodeState([o,o],[o,o],o))
+  walk(creature,up,down,NodeState([o,o],[o,o],o,creature))
 end
 
 noop(args...)=nothing
@@ -112,11 +115,11 @@ end
 function to_inertial_frame(state :: CreatureState)
   cm = mean(state.r,2)
   angle = atan2(cm[2],cm[1])
-  M = [cos(angle) -sin(angle); sin(angle) cos(angle)]
+  M = [cos(angle) -sin(angle); sin(angle) cos(angle)]'
   r = M*(state.r .- cm)
   d = M*state.d
   θ = state.θ - angle
-  return CreatureState(r,d,θ)
+  return CreatureState(r,d,θ,state.nodes)   
 end
 
 end
